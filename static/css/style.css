@@ -801,6 +801,20 @@ header {
     transform: translateY(-1px);
 }
 
+/* --- Search Highlight --- */
+mark.highlight {
+    background: rgba(6, 182, 212, 0.22);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--color-bq-cyan);
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+body.light-theme mark.highlight {
+    background: rgba(6, 182, 212, 0.18);
+    color: #000;
+}
+
 /* --- Animations --- */
 @keyframes rotate {
     from { transform: rotate(0deg); }

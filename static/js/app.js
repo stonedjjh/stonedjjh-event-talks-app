@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </button>
                             </div>
                         </div>
-                        <div class="change-content">${change.html}</div>
+                        <div class="change-content">${highlightText(change.html, searchQuery)}</div>
                     </div>
                 `;
             }).join('');
@@ -394,6 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!str) return '';
         if (str.length <= maxLength) return str;
         return str.substr(0, maxLength - 3) + '...';
+    }
+
+    function highlightText(html, query) {
+        if (!query || !query.trim()) return html;
+        const trimmedQuery = query.trim();
+        // Escapar caracteres especiales para la regex
+        const escapedQuery = trimmedQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        // Coincidir solo el texto fuera de etiquetas HTML para evitar romper elementos HTML
+        const regex = new RegExp(`(?![^<>]*>)(${escapedQuery})`, 'gi');
+        return html.replace(regex, '<mark class="highlight">$1</mark>');
     }
 
     // --- Export to CSV Logic ---
