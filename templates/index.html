@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Visualizador de notas de lanzamiento de BigQuery. Filtra, busca y comparte las últimas novedades y características de BigQuery.">
+    <title>BigQuery Release Notes Tracker</title>
+    
+    <!-- CSS Estilos -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Cabecera de la Aplicación -->
+        <header id="app-header">
+            <div class="logo-container">
+                <div class="logo-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>BigQuery Release Notes</h1>
+                    <p>Google Cloud Platform Tracker</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="btn-refresh" class="btn-refresh" aria-label="Actualizar notas de lanzamiento">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    </svg>
+                    <span>Actualizar</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Filtros y Barra de Búsqueda -->
+        <section class="filter-panel" aria-label="Controles de filtrado y búsqueda">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <input type="text" id="search-input" placeholder="Buscar en las notas de lanzamiento..." aria-label="Buscar en las notas de lanzamiento">
+            </div>
+            
+            <div class="filter-tags">
+                <span class="filter-label">Filtros:</span>
+                <button class="tag-btn active" data-filter="all">Todos</button>
+                <button class="tag-btn" data-filter="FEATURE">Novedades</button>
+                <button class="tag-btn" data-filter="FIX">Correcciones</button>
+                <button class="tag-btn" data-filter="CHANGED">Cambios</button>
+                <button class="tag-btn" data-filter="DEPRECATED">Deprecaciones</button>
+                <button class="tag-btn" data-filter="BREAKING">Críticos</button>
+            </div>
+        </section>
+
+        <!-- Panel Compositor de Tweets (Dinámico) -->
+        <section id="tweet-composer" class="tweet-composer" aria-label="Compositor de Twitter">
+            <div class="tweet-composer-header">
+                <div class="tweet-composer-title">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    <span>Compartir en Twitter</span>
+                </div>
+                <button id="btn-close-composer" class="btn-close-composer" aria-label="Descartar tweet y selección">×</button>
+            </div>
+            <div class="tweet-textarea-wrapper">
+                <textarea id="tweet-textarea" class="tweet-textarea" aria-label="Contenido del Tweet"></textarea>
+            </div>
+            <div class="tweet-composer-footer">
+                <span id="tweet-char-counter" class="tweet-char-counter">280 caracteres restantes</span>
+                <button id="btn-tweet-now" class="btn-tweet-now">
+                    <span>Twittear ahora</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Contenedor Principal de Notas de Lanzamiento -->
+        <main id="releases-container" class="releases-list" aria-live="polite">
+            <!-- Skeleton cards cargadas por defecto -->
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </main>
+    </div>
+
+    <!-- Script de Aplicación -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
