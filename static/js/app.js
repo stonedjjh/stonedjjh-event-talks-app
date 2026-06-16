@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- DOM Elements ---
     const btnRefresh = document.getElementById('btn-refresh');
+    const btnExportCsv = document.getElementById('btn-export-csv');
     const searchInput = document.getElementById('search-input');
     const filterButtons = document.querySelectorAll('.tag-btn');
     const releasesContainer = document.getElementById('releases-container');
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Event Listeners ---
     btnRefresh.addEventListener('click', fetchReleaseNotes);
+    btnExportCsv.addEventListener('click', exportToCsv);
     searchInput.addEventListener('input', handleSearch);
     
     filterButtons.forEach(btn => {
@@ -149,6 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <h2 class="card-title">${escapeHTML(note.title)}</h2>
                         </div>
+                        <button class="btn-copy-card" data-note-index="${noteIndex}" title="Copiar nota al portapapeles">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                            <span>Copiar</span>
+                        </button>
                     </div>
                     <div class="changes-list">
                         ${changesHTML}
@@ -158,10 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
         
         // Adjuntar eventos a los dinámicos
-        attachDynamicEventListeners();
+        attachDynamicEventListeners(filtered);
     }
     
-    function attachDynamicEventListeners() {
+    function attachDynamicEventListeners(filtered) {
         // Checkboxes para twittear seleccionados
         const checkboxes = releasesContainer.querySelectorAll('.change-checkbox');
         checkboxes.forEach(chk => {
@@ -185,6 +193,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tweetText = `BigQuery Update:\n"${truncateText(text, 190)}"\n\n#BigQuery #GoogleCloud`;
                 const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
                 window.open(twitterUrl, '_blank');
+            });
+        });
+
+        // Botones de copiar tarjeta al portapapeles
+        const copyCardBtns = releasesContainer.querySelectorAll('.btn-copy-card');
+        copyCardBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const noteIndex = parseInt(btn.dataset.noteIndex, 10);
+                const note = filtered[noteIndex];
+                
+                // Construir texto formateado para la nota
+                let textToCopy = `BigQuery Release Notes - ${note.title} (${note.date})\n\n`;
+                note.filteredChanges.forEach(c => {
+                    textToCopy += `[${c.type}] ${c.text}\n`;
+                });
+                
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    // Feedback visual temporal
+                    const span = btn.querySelector('span');
+                    const originalText = span.textContent;
+                    span.textContent = '¡Copiado!';
+                    btn.style.color = 'var(--color-feature)';
+                    btn.style.borderColor = 'var(--color-feature)';
+                    
+                    setTimeout(() => {
+                        span.textContent = originalText;
+                        btn.style.color = '';
+                        btn.style.borderColor = '';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Error al copiar al portapapeles: ', err);
+                });
             });
         });
     }
@@ -327,5 +367,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!str) return '';
         if (str.length <= maxLength) return str;
         return str.substr(0, maxLength - 3) + '...';
+    }
+
+    // --- Export to CSV Logic ---
+    function exportToCsv() {
+        const filtered = filterAndSearchNotes();
+        if (filtered.length === 0) {
+            alert("No hay datos filtrados para exportar.");
+            return;
+        }
+        
+        // Cabeceras del CSV (UTF-8 BOM para soporte correcto de caracteres en Excel)
+        let csvContent = "\uFEFFFecha,Título,Tipo de Cambio,Detalle\n";
+        
+        filtered.forEach(note => {
+            note.filteredChanges.forEach(change => {
+                const titleClean = note.title.replace(/"/g, '""');
+                const dateClean = note.date.replace(/"/g, '""');
+                const typeClean = change.type.replace(/"/g, '""');
+                const textClean = change.text.replace(/"/g, '""');
+                
+                csvContent += `"${dateClean}","${titleClean}","${typeClean}","${textClean}"\n`;
+            });
+        });
+        
+        // Descargar el archivo CSV
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `bigquery_release_notes_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 });
