@@ -8,9 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const btnRefresh = document.getElementById('btn-refresh');
     const btnExportCsv = document.getElementById('btn-export-csv');
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');
     const searchInput = document.getElementById('search-input');
     const filterButtons = document.querySelectorAll('.tag-btn');
     const releasesContainer = document.getElementById('releases-container');
+    
+    // Theme Toggle Icons
+    const sunIcon = btnThemeToggle.querySelector('.sun-icon');
+    const moonIcon = btnThemeToggle.querySelector('.moon-icon');
     
     // Tweet Composer Elements
     const tweetComposer = document.getElementById('tweet-composer');
@@ -19,10 +24,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnTweetNow = document.getElementById('btn-tweet-now');
     const tweetCharCounter = document.getElementById('tweet-char-counter');
     
+    // --- Load Saved Theme ---
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+    }
+    
     // --- Event Listeners ---
     btnRefresh.addEventListener('click', fetchReleaseNotes);
     btnExportCsv.addEventListener('click', exportToCsv);
     searchInput.addEventListener('input', handleSearch);
+    
+    btnThemeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('light-theme');
+        const isLight = document.body.classList.contains('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        
+        if (isLight) {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    });
     
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
